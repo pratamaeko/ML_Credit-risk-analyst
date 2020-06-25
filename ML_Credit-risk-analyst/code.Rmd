@@ -1,0 +1,64 @@
+---
+title: "Credit Risk Analyst"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+Ini adalah Machine Learning yang digunakan untuk menganalisis resiko kredit dari kreditur berdasarkan kriteria-kriteria yang ada
+
+```{r}
+#pertama kita masukkan library yang akan digunakan
+library(C50)
+library(openxlsx)
+library(reshape2)
+```
+```{r}
+#lalu kita import data, kali ini saya meminjam dataset dari DQLab Academy
+dataCredit <- read.xlsx(xlsxFile = "https://academy.dqlab.id/dataset/credit_scoring_dqlab.xlsx")
+head(dataCredit)
+```
+```{r}
+#Mempersiapkan class dan input variables 
+dataCredit$risk_rating <- as.factor(dataCredit$risk_rating)
+input_kolom <- c("durasi_pinjaman_bulan","jumlah_tanggungan","kpr_aktif","pendapatan_setahun_juta")
+datafeed <- dataCredit[input_kolom]
+str(datafeed)
+```
+```{r}
+#Mempersiapkan training dan testing set
+set.seed(100) #untuk menyeragamkan hasil random antar tiap komputer
+xtrain_value <- sample(900, 800)
+```
+```{r}
+#Membuat training set dan testing set
+xtrain <- datafeed[xtrain_value,]
+class_xtrain <- dataCredit[xtrain_value,]$risk_rating
+xtest <- datafeed[-xtrain_value,]
+```
+```{r}
+#menghasilkan model train dan menampilkan summary
+model_risk_rating <- C5.0(xtrain, class_xtrain, control = C5.0Control(label="Risk Rating"))
+summary(model_risk_rating)
+```
+```{r}
+#model sudah belajar, mari mulai kita predict
+hasil_predik <- predict(model_risk_rating, xtest)
+summary(hasil_predik)
+```
+```{r}
+#masukkan hasil prediksi ke dalam dataframe xtest
+xtest$risk_rating <- dataCredit[-xtrain_value,]$risk_rating
+xtest$hasil_prediksi <- hasil_predik
+```
+```{r}
+#melihat perbandingan data dengan confusion matrix
+dcast(hasil_prediksi ~ risk_rating, data=xtest)
+```
+```{r}
+#menghitung berapa banyak prediksi data yang benar
+nrow(xtest[xtest$risk_rating == xtest$hasil_prediksi,])
+```
+Terlihat bahwa jumlah data yang benar diprediksi adalah 96 dari 100 data test,
+maka akurasi model machine learning kita adalah sebesar 96%
