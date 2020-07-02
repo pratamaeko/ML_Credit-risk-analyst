@@ -2,7 +2,7 @@
 Model Supervised (Classification)</br>
 Versi 1, Dibuat dengan :
 - R Language
-- R Notebook
+- Jupyter Notebook
 - library C50, openxlsx, dan reshape2
 - Algoritma Decision Tree
 
